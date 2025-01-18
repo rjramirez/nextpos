@@ -3,8 +3,9 @@ const nextConfig = {
   images: {
     domains: [
       'your-project.supabase.co', // Replace with your Supabase project domain
+      'localhost',
     ],
   },
 }
 
-module.exports = nextConfig 
+module.exports = nextConfig

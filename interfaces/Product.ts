@@ -11,3 +11,4 @@ export interface Product {
   updated_at: string;
   updated_by: string;
 }
+  

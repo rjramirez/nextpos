@@ -60,7 +60,7 @@ export const useProduct = () => {
           active: product.active,
           image_url: product.image_url,
           updated_at: new Date().toISOString(),
-          updated_by: session.data.session.user.id
+          updated_by: session.data.session.user.email
         })
         .eq('product_id', product.product_id)
         .select()
@@ -85,8 +85,7 @@ export const useProduct = () => {
         .from('products')
         .insert({
           ...product,
-          created_by: session.data.session.user.id,
-          updated_by: session.data.session.user.id
+          created_by: session.data.session.user.id
         })
         .select()
         .single();

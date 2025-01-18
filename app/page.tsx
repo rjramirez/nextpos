@@ -10,10 +10,17 @@ import { useProductModal } from './products/hooks/useProductModal'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Loading from '@/app/loading'
-
+import { useCategories } from './products/hooks/useCategories'
 export default function ProductsPage() {
   const { products, loading, setProducts } = useProducts()
   const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products)
+  const { categories, loading: loadingCategories } = useCategories()
+
+  const categoryMap = categories.reduce((acc, category) => {
+    acc[category.product_category_id] = category.name;
+    return acc;
+  }, {} as Record<string, string>)
+
   const {
     isEditModalOpen,
     selectedProduct,
@@ -52,6 +59,7 @@ export default function ProductsPage() {
       <ProductGrid 
         products={filteredProducts} 
         onProductClick={handleEdit} 
+        categoryMap={categoryMap}
       />
 
       {isEditModalOpen && selectedProduct && (

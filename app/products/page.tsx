@@ -13,11 +13,12 @@ import 'react-toastify/dist/ReactToastify.css'
 import { Product } from './types'
 import { useAuth } from '@/hooks/useAuth'
 import { LoginModal } from '@/app/components/LoginModal'
-
+import { useCategories } from './hooks/useCategories'
 export default function ProductsPage() {
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
   const { products, loading, error, setProducts, refreshProducts, isInitialized } = useProducts()
   const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products)
+  const { categories, loading: loadingCategories } = useCategories()
   const {
     isEditModalOpen,
     selectedProduct,
@@ -93,6 +94,11 @@ export default function ProductsPage() {
     return <LoginModal isModal={false} />
   }
 
+  const categoryMap = categories.reduce((acc, category) => {
+    acc[category.product_category_id] = category.name;
+    return acc;
+  }, {} as Record<string, string>)
+
   return (
     <div className="p-4">
       <ProductHeader 
@@ -105,8 +111,9 @@ export default function ProductsPage() {
             stock_quantity: 0,
             active: true,
             image_url: '',
+            product_category_id: '',
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            updated_at: '',
             created_by: '',
             updated_by: ''
           })
@@ -119,10 +126,11 @@ export default function ProductsPage() {
         searchTerm={searchTerm} 
         onSearch={setSearchTerm} 
       />
-      
+
       <ProductGrid 
         products={filteredProducts} 
         onProductClick={handleEdit} 
+        categoryMap={categoryMap}
       />
 
       {isEditModalOpen && selectedProduct && (

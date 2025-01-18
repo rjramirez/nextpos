@@ -1,6 +1,6 @@
 import { Product } from '../types'
 import { useState } from 'react'
-import Image from 'next/image'
+import { useCategories } from '../hooks/useCategories'
 
 interface ProductModalProps {
   product: Product
@@ -18,6 +18,7 @@ export const ProductModal = ({
   setProduct
 }: ProductModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { categories, loading: loadingCategories } = useCategories()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,12 +56,12 @@ export const ProductModal = ({
           <div className="space-y-4">
             {/* Image Upload */}
             <div className="relative h-40 bg-gray-100 rounded-lg overflow-hidden">
-              {/* <Image
-                src={product.image_url || '/images/item-default.jpg'}
+              <img
+                src={'images/' + product.image_url || 'images/pos_default.webp'}
                 alt="Product"
-                fill
                 className="object-cover"
-              /> */}
+              />
+              
               <input
                 type="file"
                 accept="image/*"
@@ -70,6 +71,27 @@ export const ProductModal = ({
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity">
                 <span className="text-white text-sm">Change Image</span>
               </div>
+            </div>
+
+            {/* Category Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Category</label>
+              <select
+                value={product.product_category_id}
+                onChange={(e) => setProduct({ ...product, product_category_id: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="">Select a category</option>
+                {loadingCategories ? (
+                  <option>Loading...</option>
+                ) : (
+                  categories.map((category) => (
+                    <option key={category.product_category_id} value={category.product_category_id}>
+                      {category.name}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
 
             {/* Name */}
