@@ -32,12 +32,11 @@ export default function DashboardPage() {
       <div className="flex-1 p-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Products Overview</h2>
           <button 
             onClick={() => setIsCartOpen(true)}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            <span>Cart</span>
+            <span>🛒Cart</span>
             <span className="bg-blue-500 px-2 py-1 rounded-full text-sm">
               {cart.reduce((total, item) => total + item.quantity, 0)}
             </span>

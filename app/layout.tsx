@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import '../styles/globals.css';
-
+import UserProfile from '@/app/components/UserProfile';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -43,6 +43,7 @@ export default function RootLayout({
                     Orders
                   </Link>
                 </div>
+                <div className="flex items-center space-x-4"><UserProfile /></div>
               </div>
             </div>
           </nav>
