@@ -39,23 +39,19 @@ A modern, web-based Point of Sale system built with Next.js, Tailwind CSS, Supab
 
 ## Getting Started
 
-1. Clone the repository:
-bash
-git clone https://github.com/yourusername/nextpos.git
-cd nextpos
-
+1. Clone the repository
 
 2. Install dependencies:
 
 bash
-npm install
+`npm install`
 
 
 3. Set up environment variables:
 Create a `.env.local` file in the root directory with the following:
 env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_ke
+`NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_ke`
 
 
 4. Set up Supabase:
@@ -68,13 +64,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_ke
 5. Run the development server:
 
 bash
-npm run dev
+`npm run dev`
 
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
-
+```
 nextpos/
 ├── app/
 │ ├── dashboard/
@@ -98,11 +94,12 @@ nextpos/
 ├── public/
 │ └── images/
 └── styles/
-└── globals.css
-
+│ └── globals.css
+```
 ## Database Schema
 
 ### Products Table
+```
 create table products (
 product_id uuid default uuid_generate_v4() primary key,
 name text not null,
@@ -112,9 +109,10 @@ stock_quantity integer not null default 0,
 active boolean default true,
 image_url text
 );
-
+```
 
 ### Orders Table
+```
 create table orders (
 order_id uuid default uuid_generate_v4() primary key,
 product_id uuid references products(product_id),
@@ -122,6 +120,7 @@ quantity integer not null,
 total_price decimal(10,2) not null,
 status text default 'pending'
 );
+```
 
 
 ## Available Scripts
