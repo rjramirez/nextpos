@@ -1,21 +1,12 @@
 import { useState } from 'react';
 import { Product } from '../interfaces/Product';
+import { categoryEmojis } from '@/constants/cafeProductCategoryEmojis';
 
 interface CartProps {
   cart: Product[];
   onCheckout: () => void;
   categoryMap: Record<string, string>;
 }
-
-const categoryEmojis: Record<string, string> = {
-  Beverages: '☕',
-  Food: '🥪',
-  Merchandise: '🛍️',
-  Seasonal: '🎃',
-  'Coffee Beans': '🌱',
-  Teas: '🍵',
-  Unknown: '❓',
-};
 
 const Cart = ({ cart, onCheckout, categoryMap }: CartProps) => {
   return (

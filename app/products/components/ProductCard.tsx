@@ -1,18 +1,9 @@
 import { Product } from '../types'
+import { categoryEmojis } from '@/constants/cafeProductCategoryEmojis'
 
 interface ProductCardProps {
   product: Product
   categoryName: string
-}
-
-const categoryEmojis: Record<string, string> = {
-  Beverages: '☕',
-  Food: '🥪',
-  Merchandise: '🛍️',
-  Seasonal: '🎃',
-  'Coffee Beans': '🌱',
-  Teas: '🍵',
-  Unknown: '❓',
 }
 
 export const ProductCard = ({ product, categoryName }: ProductCardProps) => {
