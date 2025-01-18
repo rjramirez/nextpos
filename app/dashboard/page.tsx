@@ -68,6 +68,7 @@ export default function DashboardPage() {
           onClose={() => setIsCartOpen(false)}
           cart={cart}
           totalAmount={totalAmount}
+          categoryMap={categoryMap}
         />
       </div>
     </div>

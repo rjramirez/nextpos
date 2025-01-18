@@ -10,5 +10,6 @@ export interface Product {
   created_by: string;
   updated_at: string;
   updated_by: string;
+  product_category_id: string;
 }
   

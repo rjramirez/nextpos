@@ -4,10 +4,21 @@ interface CartModalProps {
   isOpen: boolean
   onClose: () => void
   cart: { product: Product; quantity: number }[]
-  totalAmount: number
+  totalAmount: number,
+  categoryMap: Record<string, string>
 }
 
-export default function CartModal({ isOpen, onClose, cart, totalAmount }: CartModalProps) {
+const categoryEmojis: Record<string, string> = {
+  Beverages: '☕',
+  Food: '🥪',
+  Merchandise: '🛍️',
+  Seasonal: '🎃',
+  'Coffee Beans': '🌱',
+  Teas: '🍵',
+  Unknown: '❓',
+};
+
+export default function CartModal({ isOpen, onClose, cart, totalAmount, categoryMap }: CartModalProps) {
   if (!isOpen) return null
 
   return (
@@ -35,6 +46,7 @@ export default function CartModal({ isOpen, onClose, cart, totalAmount }: CartMo
                 >
                   <div>
                     <p className="text-black font-medium">{item.product.name}</p>
+                    <p className="text-sm text-gray-600">{categoryEmojis[categoryMap[item.product.product_category_id]]}{categoryMap[item.product.product_category_id]}</p>
                     <p className="text-sm text-gray-600">₱{item.product.price} x {item.quantity}</p>
                   </div>
                   <p className="text-black font-medium">₱{item.product.price * item.quantity}</p>
