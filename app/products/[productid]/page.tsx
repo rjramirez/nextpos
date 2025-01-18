@@ -1,12 +1,14 @@
 'use client';
 
-type PageProps = {
-  params: {
-    productid: string
-  }
+interface ProductPageParams {
+  productid: string;
 }
 
-export default function ProductPage({ params }: PageProps) {
+interface ProductPageProps {
+  params: ProductPageParams;
+}
+
+export default function ProductPage({ params }: ProductPageProps) {
   const { productid } = params;
   
   return (

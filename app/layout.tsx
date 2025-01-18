@@ -28,16 +28,16 @@ export default function RootLayout({
                     href="/dashboard" 
                     className="text-black hover:text-gray-700 px-3 py-2 text-sm font-medium"
                   >
-                    Dashboard
+                    Home
                   </Link>
                   <Link 
-                    href="/dashboard/products" 
+                    href="/products" 
                     className="text-black hover:text-gray-700 px-3 py-2 text-sm font-medium"
                   >
                     Products
                   </Link>
                   <Link 
-                    href="/dashboard/orders" 
+                    href="/orders" 
                     className="text-black hover:text-gray-700 px-3 py-2 text-sm font-medium"
                   >
                     Orders

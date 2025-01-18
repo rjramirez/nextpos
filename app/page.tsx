@@ -1,23 +1,70 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { ProductHeader } from './products/components/ProductHeader'
+import { ProductSearch } from './products/components/ProductSearch'
+import { ProductGrid } from './products/components/ProductGrid'
+import { ProductModal } from './products/components/ProductModal'
+import { useProducts } from './products/hooks/useProducts'
+import { useProductSearch } from './products/hooks/useProductSearch'
+import { useProductModal } from './products/hooks/useProductModal'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import Loading from '@/app/loading'
 
-export default function HomePage() {
-  const router = useRouter();
+export default function ProductsPage() {
+  const { products, loading, setProducts } = useProducts()
+  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products)
+  const {
+    isEditModalOpen,
+    selectedProduct,
+    handleEdit,
+    handleUpdate,
+    handleImageChange,
+    setIsEditModalOpen,
+    setSelectedProduct
+  } = useProductModal(products, setProducts)
 
-  useEffect(() => {
-    // Redirect to dashboard
-    router.push('/dashboard');
-  }, [router]);
+  const csvData = products.map(product => ({
+    ID: product.product_id,
+    Name: product.name,
+    Description: product.description,
+    Price: product.price,
+    Stock: product.stock_quantity,
+    Status: product.active ? 'Active' : 'Inactive'
+  }))
 
-  // Show loading state while redirecting
+  if (loading) {
+    return <Loading size="large" color="primary" />
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Welcome to the Store</h1>
-        <p className="text-gray-600">Redirecting to dashboard...</p>
-      </div>
+    <div className="p-4">
+      <ProductHeader 
+        onAddProduct={() => setIsEditModalOpen(true)} 
+        csvData={csvData} 
+      />
+      
+      <ProductSearch 
+        searchTerm={searchTerm} 
+        onSearch={setSearchTerm} 
+      />
+      
+      <ProductGrid 
+        products={filteredProducts} 
+        onProductClick={handleEdit} 
+      />
+
+      {isEditModalOpen && selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdate={handleUpdate}
+          onImageChange={handleImageChange}
+          setProduct={setSelectedProduct}
+        />
+      )}
+
+      <ToastContainer position="bottom-right" />
     </div>
-  );
+  )
 }

@@ -80,11 +80,11 @@ nextpos/
 │ ├── dashboard/
 │ │ ├── products/
 │ │ │ ├── page.tsx
-│ │ │ └── [productid]/
+│ │ │ └── [product_id]/
 │ │ │ └── page.tsx
 │ │ └── orders/
 │ │ ├── page.tsx
-│ │ └── [orderid]/
+│ │ └── [order_id]/
 │ │ └── page.tsx
 │ ├── page.tsx
 │ └── layout.tsx
@@ -104,20 +104,20 @@ nextpos/
 
 ### Products Table
 create table products (
-productId uuid default uuid_generate_v4() primary key,
+product_id uuid default uuid_generate_v4() primary key,
 name text not null,
 description text,
 price decimal(10,2) not null,
-stockQuantity integer not null default 0,
+stock_quantity integer not null default 0,
 active boolean default true,
-imageUrl text
+image_url text
 );
 
 
 ### Orders Table
 create table orders (
 order_id uuid default uuid_generate_v4() primary key,
-product_id uuid references products(productId),
+product_id uuid references products(product_id),
 quantity integer not null,
 total_price decimal(10,2) not null,
 status text default 'pending'
