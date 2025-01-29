@@ -29,7 +29,7 @@ export const useProduct = () => {
         .select('*')
         .eq('product_id', product_id)
         .single()
-
+        
       if (error) {
         console.error('Error fetching product:', error)
         throw error
@@ -43,27 +43,13 @@ export const useProduct = () => {
     }
   }
 
-  const updateProduct = async (product: Product): Promise<Product | null> => {
+  const updateProduct = async (productId: number, updatedData: Partial<Product>): Promise<Product | null> => {
     try {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
-        throw new Error('Not authenticated');
-      }
-
       const { data, error } = await supabase
         .from('products')
-        .update({
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          stock_quantity: product.stock_quantity,
-          active: product.active,
-          image_url: product.image_url,
-          updated_at: new Date().toISOString(),
-          updated_by: session.data.session.user.email
-        })
-        .eq('product_id', product.product_id)
-        .select()
+        .update(updatedData)
+        .eq('product_id', productId)
+        .select('*')
         .single();
 
       if (error) throw error;
@@ -99,29 +85,41 @@ export const useProduct = () => {
   }
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `products/${fileName}`
+    // Check if we are in a local or development environment
+    const isLocal = process.env.NODE_ENV === 'development' || !supabase.storage;
 
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file)
+    if (isLocal) {
+      // Use local storage logic
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise((resolve) => {
+        reader.onloadend = () => {
+          resolve(reader.result as string); // Return the base64 string
+        };
+      });
+    } else {
+      // Use Supabase storage
+      const filePath = `images/${file.name}`; // Adjust the path as needed
+      const { error } = await supabase.storage
+        .from('images') // Ensure this matches your Supabase bucket name
+        .upload(filePath, file);
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError)
-        throw uploadError
+      if (error) {
+        console.error('Upload error:', error);
+        toast.error('Failed to upload image');
+        return null;
       }
 
       const { data: { publicUrl } } = supabase.storage
         .from('images')
-        .getPublicUrl(filePath)
+        .getPublicUrl(filePath);
 
-      return publicUrl
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      toast.error('Failed to upload image')
-      return null
+        if (publicUrl) {
+          console.error('Error getting public URL:', publicUrl);
+          return null;
+        }
+
+      return publicUrl; // Return the public URL of the uploaded image
     }
   }
 

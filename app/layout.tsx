@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import '../styles/globals.css';
 import UserProfile from '@/app/components/UserProfile';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {

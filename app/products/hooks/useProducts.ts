@@ -1,62 +1,56 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { Product } from '../types'
-import { useProduct } from './useProduct'
-import { toast } from 'react-toastify'
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { Product } from '../types';
 
 export const useProducts = () => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
-  const { fetchProducts } = useProduct()
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadProducts = useCallback(async (mounted = true) => {
-    if (!mounted) return;
-    
-    try {
-      const data = await fetchProducts();
-      
-      if (mounted) {
-        setProducts(data);
-        setError(null);
-      }
-    } catch (err) {
-      if (mounted) {
-        const error = err instanceof Error ? err : new Error('Failed to fetch products');
-        setError(error);
-        toast.error(error.message);
-      }
-    } finally {
-      if (mounted) {
-        setLoading(false);
-        setIsInitialized(true);
-      }
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('products').select('*');
+    if (error) {
+      console.error('Error fetching products:', error);
+      setError(error.message);
+    } else {
+      setProducts(data);
     }
-  }, [fetchProducts]);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    let mounted = true;
-    
-    if (!isInitialized) {
-      loadProducts(mounted);
+    fetchProducts(); // Fetch products on mount
+  }, []);
+
+  // Update a product
+  const updateProduct = async (productId: number, updatedData: Partial<Product>) => {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updatedData)
+      .eq('product_id', productId)
+      .select('*'); // Ensure you are selecting the updated data
+
+    if (error) {
+      throw error; // Handle error appropriately
     }
 
-    return () => {
-      mounted = false;
-    };
-  }, [loadProducts, isInitialized]);
+    // Update the local state with the updated product
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.product_id === productId ? { ...product, ...data[0] } : product
+      )
+    );
 
-  const refreshProducts = useCallback(() => {
-    setLoading(true);
-    return loadProducts(true);
-  }, [loadProducts]);
+    return data; // Return the updated product data
+  };
 
-  return { 
-    products, 
-    loading, 
-    error, 
-    setProducts,
-    refreshProducts,
-    isInitialized: isInitialized || products.length > 0 || error !== null
-  }
-}
+  return {
+    products,
+    loading,
+    error,
+    fetchProducts, // Expose fetchProducts for manual re-fetching
+    updateProduct,
+  };
+};

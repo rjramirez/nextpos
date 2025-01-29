@@ -1,16 +1,15 @@
 import { useAuth } from '../hooks/useAuth';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { signInWithGoogle } = useAuth();
 
-  const handleLogin = (provider: 'google' | 'github' | 'facebook') => {
-    login(provider);
+  const handleLogin = () => {
+    signInWithGoogle();
   };
 
   return (
     <div>
-      <button onClick={() => handleLogin('google')}>Login with Google</button>
-      {/* Add other providers here */}
+      <button onClick={handleLogin}>Login with Google</button>
     </div>
   );
 };

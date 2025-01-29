@@ -1,71 +1,101 @@
-import { useState } from 'react'
-import { Product } from '../types'
-import { useProduct } from './useProduct'
-import { toast } from 'react-toastify'
+// app/products/hooks/useProductModal.ts
+import { useState } from 'react';
+import { Product } from '../types';
+import { useProduct } from './useProduct';
+import { toast } from 'react-toastify';
 
-export const useProductModal = (products: Product[], setProducts: (products: Product[]) => void) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const { updateProduct, handleImageUpload, fetchProduct } = useProduct()
+export const useProductModal = (products: Product[], fetchProducts: () => void) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { updateProduct, createProduct, handleImageUpload } = useProduct();
 
-  const handleEdit = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const freshProduct = await fetchProduct(product.product_id)
-      if (freshProduct) {
-        setSelectedProduct(freshProduct)
-        setIsEditModalOpen(true)
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleAdd = () => {
+    const newProduct: Product = {
+      product_id: 0, // Temporary ID for new product
+      name: '',
+      description: '',
+      price: 0,
+      stock_quantity: 0,
+      active: true,
+      image_url: '',
+      created_at: new Date().toISOString(),
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      product_category_id: '',
+    };
+
+    setSelectedProduct(newProduct);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdate = async (updatedProduct: Product) => {
+    if (updatedProduct.product_id === 0) {
+      // Adding a new product
+      try {
+        const createdProduct = await createProduct({
+          name: updatedProduct.name,
+          description: updatedProduct.description,
+          price: updatedProduct.price,
+          stock_quantity: updatedProduct.stock_quantity,
+          active: updatedProduct.active,
+          image_url: updatedProduct.image_url,
+          product_category_id: updatedProduct.product_category_id,
+        });
+        if (createdProduct) {
+          toast.success('Product added successfully!');
+          await fetchProducts();
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+        }
+      } catch {
+        toast.error('Failed to add product.');
       }
-    } catch (error) {
-      toast.error('Failed to load product details')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleUpdate = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const updatedProduct = await updateProduct(product)
-      if (updatedProduct) {
-        // Update the products list with the new data
-        setProducts(products.map(p => 
-          p.product_id === updatedProduct.product_id ? updatedProduct : p
-        ))
-        setIsEditModalOpen(false)
-        setSelectedProduct(null)
-        toast.success('Product updated successfully')
-      } else {
-        throw new Error('Failed to update product')
+    } else {
+      // Editing an existing product
+      try {
+        await updateProduct(updatedProduct.product_id, {
+          name: updatedProduct.name,
+          price: updatedProduct.price,
+          description: updatedProduct.description,
+          stock_quantity: updatedProduct.stock_quantity,
+          active: updatedProduct.active,
+          image_url: updatedProduct.image_url,
+          product_category_id: updatedProduct.product_category_id,
+        });
+        toast.success('Product updated successfully!');
+        await fetchProducts();
+        setIsEditModalOpen(false);
+        setSelectedProduct(null);
+      } catch {
+        toast.error('Failed to update product.');
       }
-    } catch (error) {
-      console.error('Update error:', error)
-      toast.error('Failed to update product')
-    } finally {
-      setIsLoading(false)
     }
-  }
+  };
 
   const handleImageChange = async (file: File) => {
     try {
-      const image_url = await handleImageUpload(file)
-      return image_url
-    } catch (error) {
-      console.error('Image upload error:', error)
-      toast.error('Failed to upload image')
-      return null
+      const imageUrl = await handleImageUpload(file);
+      return imageUrl;
+    } catch {
+      toast.error('Image upload failed.');
+      return null;
     }
-  }
+  };
 
   return {
     isEditModalOpen,
+    setIsEditModalOpen,
     selectedProduct,
-    isLoading,
     handleEdit,
+    handleAdd,
     handleUpdate,
     handleImageChange,
-    setIsEditModalOpen,
-    setSelectedProduct
-  }
-}
+    setSelectedProduct,
+  };
+};

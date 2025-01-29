@@ -1,5 +1,6 @@
 import { Product } from '../types'
 import { categoryEmojis } from '@/constants/cafeProductCategoryEmojis'
+import Image from 'next/image'
 
 interface ProductCardProps {
   product: Product
@@ -12,10 +13,12 @@ export const ProductCard = ({ product, categoryName }: ProductCardProps) => {
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="relative aspect-square">
-        <img
-          src={'images/' + product.image_url || 'images/pos_default.webp'}
+        <Image
+          src={'/images/' + (product.image_url || 'pos_default.webp')}
           alt={product.name}
-          className="object-cover rounded-t-lg"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-t-lg"
         />
       </div>
       <div className="p-2">
@@ -27,11 +30,11 @@ export const ProductCard = ({ product, categoryName }: ProductCardProps) => {
         <div className="flex justify-between items-center mt-1">
           <span className="text-sm font-medium">${product.price.toFixed(2)}</span>
           <span className={`text-xs px-2 py-1 rounded-full ${
-            product.stock_quantity > 0 
+            product.stock_quantity && product.stock_quantity > 0 
               ? 'bg-green-100 text-green-800' 
               : 'bg-red-100 text-red-800'
           }`}>
-            {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+            {product.stock_quantity && product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
           </span>
         </div>
       </div>

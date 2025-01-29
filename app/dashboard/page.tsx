@@ -18,7 +18,7 @@ export default function DashboardPage() {
   } = useCart()
   const { categories, loading: loadingCategories } = useCategories()
   const categoryMap = categories.reduce((acc, category) => {
-    acc[category.product_category_id] = category.name;
+    acc[category.category_id] = category.name;
     return acc;
   }, {} as Record<string, string>)
 

@@ -1,9 +1,22 @@
-import { CSVLink } from 'react-csv'
-import { ShoppingCartIcon, PlusIcon } from '@heroicons/react/24/outline'
+// app/products/components/ProductHeader.tsx
+import { CSVLink } from 'react-csv';
+import { ShoppingCartIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface ProductHeaderProps {
-  onAddProduct: () => void
-  csvData: any[]
+  onAddProduct: () => void;
+  csvData: Array<{
+    ID: number | string;
+    Name: string;
+    Description: string;
+    Price: number;
+    Stock: number;
+    Status: string;
+    Created_By: string;
+    Updated_By: string;
+    Created_At: string;
+    Updated_At: string;
+    Active: boolean;    
+  }>;
 }
 
 export const ProductHeader = ({ onAddProduct, csvData }: ProductHeaderProps) => (
@@ -27,4 +40,4 @@ export const ProductHeader = ({ onAddProduct, csvData }: ProductHeaderProps) => 
       </CSVLink>
     </div>
   </div>
-)
+);

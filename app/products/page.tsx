@@ -1,35 +1,36 @@
-'use client'
+// app/products/page.tsx
+'use client';
 
-import { ProductHeader } from './components/ProductHeader'
-import { ProductSearch } from './components/ProductSearch'
-import { ProductGrid } from './components/ProductGrid'
-import { ProductModal } from './components/ProductModal'
-import { useProducts } from './hooks/useProducts'
-import { useProductSearch } from './hooks/useProductSearch'
-import { useProductModal } from './hooks/useProductModal'
-import Loading from '@/app/loading'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { Product } from './types'
-import { useAuth } from '@/hooks/useAuth'
-import { LoginModal } from '@/app/components/LoginModal'
-import { useCategories } from './hooks/useCategories'
+import { ProductHeader } from './components/ProductHeader';
+import { ProductSearch } from './components/ProductSearch';
+import { ProductGrid } from './components/ProductGrid';
+import ProductModal from './components/ProductModal';
+import { useProducts } from './hooks/useProducts';
+import { useProductSearch } from './hooks/useProductSearch';
+import { useProductModal } from './hooks/useProductModal';
+import Loading from '@/app/loading';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '@/hooks/useAuth';
+import { LoginModal } from '@/app/components/LoginModal';
+import { useCategories } from './hooks/useCategories';
+
 export default function ProductsPage() {
-  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut } = useAuth()
-  const { products, loading, error, setProducts, refreshProducts, isInitialized } = useProducts()
-  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products)
-  const { categories, loading: loadingCategories } = useCategories()
+  const { user } = useAuth();
+  const { products, loading, error, fetchProducts } = useProducts();
+  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products);
+  const { categories } = useCategories();
   const {
     isEditModalOpen,
+    setIsEditModalOpen,
     selectedProduct,
-    isLoading: modalLoading,
     handleEdit,
+    handleAdd,
     handleUpdate,
     handleImageChange,
-    setIsEditModalOpen,
     setSelectedProduct
-  } = useProductModal(products, setProducts)
-  
+  } = useProductModal(products, fetchProducts);
+
   const csvData = products.map(product => ({
     ID: product.product_id,
     Name: product.name,
@@ -42,27 +43,11 @@ export default function ProductsPage() {
     Created_At: product.created_at,
     Updated_At: product.updated_at,
     Active: product.active
-  }))
-
-  const handleProductUpdate = async (product: Product) => {
-    try {
-      await handleUpdate(product)
-      // Only refresh products if the update was successful
-      await refreshProducts()
-    } catch (error) {
-      console.error('Error in handleProductUpdate:', error)
-    }
-  }
-
-  console.log('ProductsPage render:', { 
-    productsCount: products.length, 
-    loading, 
-    error 
-  });
+  }));
 
   // Show loading state only during initial load
-  if (!isInitialized && loading) {
-    return <Loading />
+  if (loading) {
+    return <Loading />;
   }
 
   // Show error state
@@ -71,54 +56,31 @@ export default function ProductsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Products</h2>
-          <p className="text-gray-600 mb-4">{error.message}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => {
-              console.log('Retrying product fetch...');
-              refreshProducts();
-            }}
+            onClick={fetchProducts}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Try Again
           </button>
         </div>
       </div>
-    )
-  }
-
-  if (loading) {
-    return <Loading />
+    );
   }
 
   if (!user) {
-    return <LoginModal isModal={false} />
+    return <LoginModal isModal={false} />;
   }
 
   const categoryMap = categories.reduce((acc, category) => {
-    acc[category.product_category_id] = category.name;
+    acc[category.category_id] = category.name;
     return acc;
-  }, {} as Record<string, string>)
+  }, {} as Record<string, string>);
 
   return (
     <div className="p-4">
       <ProductHeader 
-        onAddProduct={() => {
-          setSelectedProduct({
-            product_id: '',
-            name: '',
-            description: '',
-            price: 0,
-            stock_quantity: 0,
-            active: true,
-            image_url: '',
-            product_category_id: '',
-            created_at: new Date().toISOString(),
-            updated_at: '',
-            created_by: '',
-            updated_by: ''
-          })
-          setIsEditModalOpen(true)
-        }} 
+        onAddProduct={handleAdd} // Use handleAdd from hook
         csvData={csvData} 
       />
       
@@ -137,16 +99,15 @@ export default function ProductsPage() {
         <ProductModal
           product={selectedProduct}
           onClose={() => {
-            setIsEditModalOpen(false)
-            setSelectedProduct(null)
+            setIsEditModalOpen(false);
+            setSelectedProduct(null);
           }}
-          onUpdate={handleProductUpdate}
+          onUpdate={handleUpdate}
           onImageChange={handleImageChange}
-          setProduct={setSelectedProduct}
         />
       )}
 
       <ToastContainer position="bottom-right" />
     </div>
-  )
+  );
 }

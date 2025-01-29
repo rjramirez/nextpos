@@ -4,6 +4,7 @@ const nextConfig = {
     domains: [
       'your-project.supabase.co', // Replace with your Supabase project domain
       'localhost',
+      'lh3.googleusercontent.com',
     ],
   },
 }

@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
+type Category = {
+  category_id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export const useCategories = () => {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
