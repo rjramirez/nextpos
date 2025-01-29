@@ -13,6 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from '@/hooks/useAuth';
 import { LoginModal } from '@/app/components/LoginModal';
 import { useCategories } from './hooks/useCategories';
+import { Pagination } from '../components/Pagination';
 
 export default function ProductsPage() {
   const { user } = useAuth();
@@ -20,12 +21,14 @@ export default function ProductsPage() {
     products, 
     loading, 
     error, 
-    fetchProducts, 
     page, 
     totalProducts, 
     pageSize, 
     searchTerm, 
-    setSearchTerm 
+    setSearchTerm,
+    setPage,
+    hasMore,
+    loadMoreProducts
   } = useProducts();
   const { categories } = useCategories();
   const {
@@ -37,17 +40,14 @@ export default function ProductsPage() {
     handleUpdate,
     handleImageChange,
     setSelectedProduct
-  } = useProductModal(products, fetchProducts);
+  } = useProductModal(products, () => {});
 
   const totalPages = Math.ceil(totalProducts / pageSize);
 
-  const handlePageChange = (newPage: number) => {
-    fetchProducts(newPage, searchTerm);
-  };
-
   const handleSearch = (term: string) => {
+    console.log('Search term changed:', term);
     setSearchTerm(term);
-    fetchProducts(1, term);
+    setPage(1);  // Reset to first page when searching
   };
 
   const csvData = products.map(product => ({
@@ -65,7 +65,7 @@ export default function ProductsPage() {
   }));
 
   // Show loading state only during initial load
-  if (loading) {
+  if (loading && products.length === 0) {
     return <Loading />;
   }
 
@@ -77,7 +77,7 @@ export default function ProductsPage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Products</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => fetchProducts()}
+            onClick={() => setPage(1)}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Try Again
@@ -99,37 +99,58 @@ export default function ProductsPage() {
   return (
     <div className="p-4">
       <ProductHeader 
-        onAddProduct={handleAdd} 
+        onAddProduct={() => setIsEditModalOpen(true)} 
         csvData={csvData} 
       />
       
-      <ProductSearch {...({
-        searchTerm, 
-        onSearch: handleSearch,
-        currentPage: page,
-        totalPages,
-        onPageChange: handlePageChange
-      } as ProductSearchWithPaginationProps)} />
-
+      <ProductSearch 
+        searchTerm={searchTerm} 
+        onSearch={handleSearch}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={(newPage: number) => {
+          console.log('Page change triggered:', newPage);
+          setPage(newPage);
+        }}
+      />
+      
       <ProductGrid 
-        products={products} 
-        onProductClick={handleEdit} 
+        products={products}
+        onProductClick={handleEdit}
         categoryMap={categoryMap}
       />
+      
+      <Pagination 
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={(newPage: number) => {
+          console.log('Page change triggered:', newPage);
+          setPage(newPage);
+        }}
+      />
+
+      {hasMore && (
+        <div className="flex justify-center mt-4">
+          <button 
+            onClick={loadMoreProducts}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Load More'}
+          </button>
+        </div>
+      )}
 
       {isEditModalOpen && selectedProduct && (
         <ProductModal
           product={selectedProduct}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedProduct(null);
-          }}
+          onClose={() => setIsEditModalOpen(false)}
           onUpdate={handleUpdate}
           onImageChange={handleImageChange}
         />
       )}
 
-      <ToastContainer position="bottom-right" />
+      <ToastContainer position="top-right" />
     </div>
-  );
+  )
 }
