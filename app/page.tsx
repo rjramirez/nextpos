@@ -17,16 +17,16 @@ export default function ProductsPage() {
   const { 
     products, 
     loading, 
-    fetchProducts, 
-    page, 
-    setPage, 
+    hasMore,
+    page,
     pageSize,
     totalProducts,
     searchTerm,
-    setSearchTerm
+    setSearchTerm,
+    setPage,
+    loadMoreProducts
   } = useProducts()
 
-  const { filteredProducts } = useProductSearch(products)
   const { categories } = useCategories()
 
   const categoryMap = categories.reduce((acc, category) => {
@@ -41,7 +41,7 @@ export default function ProductsPage() {
     handleUpdate,
     handleImageChange,
     setIsEditModalOpen,
-  } = useProductModal(products, fetchProducts)
+  } = useProductModal(products, () => {})  
 
   const csvData = products.map(product => ({
     ID: product.product_id,
@@ -57,7 +57,7 @@ export default function ProductsPage() {
     Active: product.active === true
   }))
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return <Loading size="large" color="primary" />
   }
 
@@ -71,34 +71,44 @@ export default function ProductsPage() {
       <ProductSearch 
         searchTerm={searchTerm} 
         onSearch={(term) => {
-          setSearchTerm(term)
-          setPage(1)  // Reset to first page when searching
+          console.log('Search term changed:', term);
+          setSearchTerm(term);
+          setPage(1);  
         }}
         currentPage={page}
         totalPages={Math.ceil(totalProducts / pageSize)}
         onPageChange={(newPage: number) => {
           console.log('Page change triggered:', newPage);
-          setPage(newPage)
-          console.log('Fetching products for page:', newPage, 'with search term:', searchTerm);
-          fetchProducts(newPage, searchTerm)
+          setPage(newPage);
         }}
       />
       
       <ProductGrid 
-        products={filteredProducts} 
+        products={products}
         onProductClick={handleEdit}
         categoryMap={categoryMap}
       />
+      
       <Pagination 
         currentPage={page}
         totalPages={Math.ceil(totalProducts / pageSize)}
         onPageChange={(newPage: number) => {
           console.log('Page change triggered:', newPage);
-          setPage(newPage)
-          console.log('Fetching products for page:', newPage, 'with search term:', searchTerm);
-          fetchProducts(newPage, searchTerm)
+          setPage(newPage);
         }}
       />
+
+      {hasMore && (
+        <div className="flex justify-center mt-4">
+          <button 
+            onClick={loadMoreProducts}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Load More'}
+          </button>
+        </div>
+      )}
 
       {isEditModalOpen && selectedProduct && (
         <ProductModal
