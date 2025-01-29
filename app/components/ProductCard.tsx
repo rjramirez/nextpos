@@ -1,4 +1,4 @@
-import { Product } from '../types'
+import { Product } from '../products/types'
 import { categoryEmojis } from '@/constants/cafeProductCategoryEmojis'
 import Image from 'next/image'
 

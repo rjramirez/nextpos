@@ -6,23 +6,42 @@ export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Add new state variables
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch products from Supabase
-  const fetchProducts = async () => {
+  // Fetch products from Supabase with pagination and search
+  const fetchProducts = async (page: number = 1, searchTerm: string = '') => {
     setLoading(true);
-    const { data, error } = await supabase.from('products').select('*');
+    setPage(page);
+    setSearchTerm(searchTerm);
+    
+    // Construct the query with pagination and optional search
+    let query = supabase.from('products').select('*', { count: 'exact' });
+    
+    if (searchTerm) {
+      query = query.ilike('name', `%${searchTerm}%`);
+    }
+    
+    const { data, count, error } = await query
+      .range((page - 1) * pageSize, page * pageSize - 1);
+
     if (error) {
       console.error('Error fetching products:', error);
       setError(error.message);
     } else {
-      setProducts(data);
+      setProducts(data || []);
+      setTotalProducts(count || 0);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchProducts(); // Fetch products on mount
-  }, []);
+    fetchProducts(); // Fetch products on mount and when search/page changes
+  }, [page, searchTerm]);
 
   // Update a product
   const updateProduct = async (productId: number, updatedData: Partial<Product>) => {
@@ -30,10 +49,10 @@ export const useProducts = () => {
       .from('products')
       .update(updatedData)
       .eq('product_id', productId)
-      .select('*'); // Ensure you are selecting the updated data
+      .select('*');
 
     if (error) {
-      throw error; // Handle error appropriately
+      throw error;
     }
 
     // Update the local state with the updated product
@@ -43,14 +62,20 @@ export const useProducts = () => {
       )
     );
 
-    return data; // Return the updated product data
+    return data;
   };
 
   return {
     products,
     loading,
     error,
-    fetchProducts, // Expose fetchProducts for manual re-fetching
-    updateProduct,
+    page,
+    totalProducts,
+    pageSize,
+    searchTerm,
+    fetchProducts,
+    setPage,
+    setSearchTerm,
+    updateProduct
   };
 };

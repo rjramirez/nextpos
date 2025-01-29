@@ -1,9 +1,9 @@
 'use client'
 
-import { ProductHeader } from './products/components/ProductHeader'
-import { ProductSearch } from './products/components/ProductSearch'
-import { ProductGrid } from './products/components/ProductGrid'
-import ProductModal from './products/components/ProductModal'
+import { ProductHeader } from './components/ProductHeader'
+import { ProductSearch } from './components/ProductSearch'
+import { ProductGrid } from './components/ProductGrid'
+import ProductModal from './components/ProductModal'
 import { useProducts } from './products/hooks/useProducts'
 import { useProductSearch } from './products/hooks/useProductSearch'
 import { useProductModal } from './products/hooks/useProductModal'
@@ -11,10 +11,22 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Loading from '@/app/loading'
 import { useCategories } from './products/hooks/useCategories'
+import { Pagination } from './components/Pagination'
 
 export default function ProductsPage() {
-  const { products, loading, fetchProducts } = useProducts()
-  const { searchTerm, setSearchTerm, filteredProducts } = useProductSearch(products)
+  const { 
+    products, 
+    loading, 
+    fetchProducts, 
+    page, 
+    setPage, 
+    pageSize,
+    totalProducts,
+    searchTerm,
+    setSearchTerm
+  } = useProducts()
+
+  const { filteredProducts } = useProductSearch(products)
   const { categories } = useCategories()
 
   const categoryMap = categories.reduce((acc, category) => {
@@ -58,13 +70,30 @@ export default function ProductsPage() {
       
       <ProductSearch 
         searchTerm={searchTerm} 
-        onSearch={setSearchTerm} 
+        onSearch={(term) => {
+          setSearchTerm(term)
+          setPage(1)  // Reset to first page when searching
+        }}
+        currentPage={page}
+        totalPages={Math.ceil(totalProducts / pageSize)}
+        onPageChange={(newPage: number) => {
+          setPage(newPage)
+          fetchProducts(newPage, searchTerm)
+        }}
       />
       
       <ProductGrid 
         products={filteredProducts} 
-        onProductClick={handleEdit} 
+        onProductClick={handleEdit}
         categoryMap={categoryMap}
+      />
+      <Pagination 
+        currentPage={page}
+        totalPages={Math.ceil(totalProducts / pageSize)}
+        onPageChange={(newPage: number) => {
+          setPage(newPage)
+          fetchProducts(newPage, searchTerm)
+        }}
       />
 
       {isEditModalOpen && selectedProduct && (

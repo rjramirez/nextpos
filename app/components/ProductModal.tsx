@@ -1,5 +1,5 @@
 // app/products/components/ProductModal.tsx
-import { Product } from '../types';
+import { Product } from '../products/types';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import Image from 'next/image';
