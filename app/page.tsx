@@ -77,7 +77,9 @@ export default function ProductsPage() {
         currentPage={page}
         totalPages={Math.ceil(totalProducts / pageSize)}
         onPageChange={(newPage: number) => {
+          console.log('Page change triggered:', newPage);
           setPage(newPage)
+          console.log('Fetching products for page:', newPage, 'with search term:', searchTerm);
           fetchProducts(newPage, searchTerm)
         }}
       />
@@ -91,7 +93,9 @@ export default function ProductsPage() {
         currentPage={page}
         totalPages={Math.ceil(totalProducts / pageSize)}
         onPageChange={(newPage: number) => {
+          console.log('Page change triggered:', newPage);
           setPage(newPage)
+          console.log('Fetching products for page:', newPage, 'with search term:', searchTerm);
           fetchProducts(newPage, searchTerm)
         }}
       />
