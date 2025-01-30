@@ -2,7 +2,7 @@
 'use client';
 
 import { ProductHeader } from '../components/ProductHeader';
-import { ProductSearch, ProductSearchWithPaginationProps } from '../components/ProductSearch';
+import { ProductSearch } from '../components/ProductSearch';
 import { ProductGrid } from '../components/ProductGrid';
 import ProductModal from '../components/ProductModal';
 import { useProducts } from './hooks/useProducts';
@@ -36,10 +36,8 @@ export default function ProductsPage() {
     setIsEditModalOpen,
     selectedProduct,
     handleEdit,
-    handleAdd,
     handleUpdate,
     handleImageChange,
-    setSelectedProduct
   } = useProductModal(products, () => {});
 
   const totalPages = Math.ceil(totalProducts / pageSize);

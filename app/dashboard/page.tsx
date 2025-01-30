@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback, useMemo } from 'react'
 import Loading from '@/app/loading'
 import { useProducts } from '../products/hooks/useProducts'
 import { useCart } from './hooks/useCart'
@@ -36,49 +37,46 @@ export default function DashboardPage() {
   } = useCart()
   const { categories } = useCategories()
   
-  const totalPages = Math.ceil(totalProducts / pageSize);
+  // Memoize derived values to prevent unnecessary recalculations
+  const totalPages = useMemo(() => Math.ceil(totalProducts / pageSize), [totalProducts, pageSize])
 
-  const categoryMap = categories.reduce((acc, category) => {
-    acc[category.category_id] = category.name;
-    return acc;
-  }, {} as Record<string, string>)
+  const categoryMap = useMemo(() => 
+    categories.reduce((acc, category) => {
+      acc[category.category_id] = category.name;
+      return acc;
+    }, {} as Record<string, string>),
+    [categories]
+  )
 
-  const handlePageChange = (newPage: number) => {
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handlePageChange = useCallback((newPage: number) => {
     fetchProducts(newPage, searchTerm);
-  };
+  }, [fetchProducts, searchTerm])
 
-  const handleSearch = (term: string) => {
+  const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
     fetchProducts(1, term);
-  };
+  }, [setSearchTerm, fetchProducts])
 
-  // Show loading state
-  if (loading) {
-    return <Loading />
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Products</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => fetchProducts()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Try Again
-          </button>
-        </div>
+  // Prevent rendering if critical data is not ready
+  if (loading) return <Loading />
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Products</h2>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={() => fetchProducts()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Try Again
+        </button>
       </div>
-    );
-  }
-
-  // Check authentication
-  if (!user) {
-    return <LoginModal isModal={false} />;
-  }
+    </div>
+  )
+  
+  // Additional authentication check
+  if (!user) return <LoginModal isModal={false} />
 
   return (
     <div className="p-4">
@@ -112,7 +110,7 @@ export default function DashboardPage() {
       
       <Pagination 
         currentPage={page}
-        totalPages={Math.ceil(totalProducts / pageSize)}
+        totalPages={totalPages}
         onPageChange={(newPage: number) => {
           setPage(newPage)
           fetchProducts(newPage, searchTerm)

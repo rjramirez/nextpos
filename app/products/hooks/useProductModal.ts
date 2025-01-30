@@ -23,7 +23,7 @@ export const useProductModal = (products: Product[], fetchProducts: () => void) 
       stock_quantity: 0,
       active: true,
       image_url: '',
-      created_at: new Date().toISOString(),
+      created_at: new Date().toUTCString(),
       updated_at: '',
       created_by: '',
       updated_by: '',
