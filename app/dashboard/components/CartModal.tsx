@@ -3,6 +3,7 @@ import { Product } from "@/app/products/types";
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'react-toastify';
+import { OrderStatuses } from '@/constants/orderStatuses';
 
 interface CartModalProps {
   isOpen: boolean
@@ -91,26 +92,36 @@ export default function CartModal({ isOpen, onClose, cart, totalAmount, category
         throw transactionProofError
       }
 
-      // Insert order items
-      const orderItemsInserts = cart.map(item => ({
-        product_id: item.product.product_id.toString(),
-        quantity: item.quantity,
-        status: 'pending' as const,
-        order_date: new Date().toUTCString(),
-        created_by: user.email,
-        transaction_proof_id: transactionProofData[0].id
-      }))
-
-      const { error: orderError, data: orderData } = await supabase
+      // Insert order with total price
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert(orderItemsInserts)
+        .insert({
+          user_id: user.id,
+          total_price: totalAmount,
+          status: OrderStatuses.PENDING,
+          transaction_proof_id: transactionProofData[0].transaction_proof_id,
+          created_at: new Date().toUTCString()
+        })
+        .select()
 
       if (orderError) {
-        console.error('Supabase Order Insertion Error:', {
-          error: orderError,
-          orderItemsInserts: JSON.stringify(orderItemsInserts)
-        });
-        throw new Error(`Failed to save order: ${orderError.message}`);
+        throw orderError
+      }
+
+      // Insert order items
+      const orderItemsInserts = cart.map(item => ({
+        order_id: orderData[0].order_id,
+        product_id: item.product.product_id,
+        quantity: item.quantity,
+        item_price: item.product.price
+      }))
+
+      const { error: orderItemsError } = await supabase
+        .from('order_items')
+        .insert(orderItemsInserts)
+
+      if (orderItemsError) {
+        throw orderItemsError
       }
 
       console.log('Order saved successfully:', orderData);

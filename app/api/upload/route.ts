@@ -10,7 +10,7 @@ export const config = {
 
 export async function POST(req: NextRequest) {
   // Ensure the transaction_proofs directory exists
-  const uploadDir = path.join(process.cwd(), 'public', 'transaction_proofs');
+  const uploadDir = path.join(process.cwd(), 'transaction_proofs');
   
   // Create directory if it doesn't exist
   if (!fs.existsSync(uploadDir)) {
